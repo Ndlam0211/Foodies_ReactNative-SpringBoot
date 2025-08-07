@@ -8,6 +8,7 @@ import { useSharedState } from "../tabs/SharedContext";
 import Graphics from "@/components/home/Graphics";
 import HeaderSection from "@/components/home/HeaderSection";
 import { StatusBar } from "expo-status-bar";
+import MainList from "@/components/list/MainList";
 
 const DeliveryScreen: FC = () => {
     const insets = useSafeAreaInsets();
@@ -61,7 +62,7 @@ const DeliveryScreen: FC = () => {
         </Animated.View>
 
         <Animated.View style={moveUpStyle}>
-          
+          <MainList />
         </Animated.View>
       </View>
     );

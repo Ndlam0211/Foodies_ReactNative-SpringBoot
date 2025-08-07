@@ -48,7 +48,7 @@ export const restaurantStyles = createStyleSheet(({ device, colors, border }) =>
         justifyContent: 'space-between',
     },
     textPart: {
-        width: '70%'
+        width:'70%'
     },
     backToTopButton: {
         position: 'absolute',

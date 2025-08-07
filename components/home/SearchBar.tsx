@@ -8,6 +8,8 @@ import Icon from '../global/Icon';
 import { Colors } from '@/unistyles/Constants';
 import CustomText from '../global/CustomText';
 import RollingContent from 'react-native-rolling-bar'
+import { useAppDispatch, useAppSelector } from '@/states/reduxHook';
+import { setVegMode } from '@/states/reducers/userSlice';
 
 const searchItems: string[] = [
   'Search "chai samosa"',
@@ -18,7 +20,8 @@ const searchItems: string[] = [
 ];
 
 const SearchBar = () => {
-    const isVegMode = true;
+    const dispatch = useAppDispatch();
+    const isVegMode = useAppSelector(state => state.user.isVegMode);
     const { styles } = useStyles(homeStyles);
     const { scrollYGlobal } = useSharedState();
 
@@ -73,7 +76,7 @@ const SearchBar = () => {
             />
           </TouchableOpacity>
 
-          <Pressable style={styles.vegMode} onPress={() => {}}>
+          <Pressable style={styles.vegMode} onPress={() => {dispatch(setVegMode(!isVegMode))}}>
             <Animated.Text style={[textColorAnimation, styles.animatedText]}>
               VEG
             </Animated.Text>

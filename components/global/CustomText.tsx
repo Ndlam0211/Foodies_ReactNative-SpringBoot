@@ -61,7 +61,7 @@ const CustomText:FC<CustomTextProps> = ({
         <Text
             numberOfLines={numberOfLines !== undefined ? numberOfLines : undefined}
             onLayout={onLayout}
-            style={[styles.text, {color: color || Colors.text, fontSize: computedFontSize}, fontFamilyStyle, style]}
+            style={[{color: color || Colors.text, fontSize: computedFontSize}, fontFamilyStyle, style]}
             {...props}
         >{children}</Text>
     )
