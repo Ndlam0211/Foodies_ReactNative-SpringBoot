@@ -1,5 +1,6 @@
-import { persistor, store } from "../states/store";
 import "@/unistyles/unistyles";
+import "react-native-get-random-values";
+import { persistor, store } from "../states/store";
 import { navigationRef } from "@/utils/NavigationUtils";
 import { Stack, useNavigationContainerRef } from "expo-router";
 import { useEffect } from "react";
