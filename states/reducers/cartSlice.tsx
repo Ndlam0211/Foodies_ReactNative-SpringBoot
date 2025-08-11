@@ -1,6 +1,13 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { v4 as uuid } from 'uuid'
 import { RootState } from '../store';
+
+function uuidv4() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 interface CartItem {
   isVeg: boolean;
@@ -168,7 +175,7 @@ export const cartSlice = createSlice({
           if (
             existingCustomizationIndex !== undefined &&
             existingCustomizationIndex !== -1
-          ) {
+          ) {            
             const existingCustomization =
               existingItem?.customizations[existingCustomizationIndex];
 
@@ -178,13 +185,15 @@ export const cartSlice = createSlice({
             // Cập nhật lại tổng giá của customization này
             existingCustomization.cartPrice += customization?.price;
           } else {
-            const newCustomizationId = uuid();
+            
+            const newCustomizationId = uuidv4();
+            
             existingItem?.customizations?.push({
               id: newCustomizationId,
               ...customization, // Sao chép dữ liệu customization gốc
-              quantity: customization.quantity, // Số lượng của customization
-              cartPrice: customization.price, // Giá customization
-              price: customization.price / customization.quantity, // Giá 1 đơn vị
+              quantity: customization?.quantity, // Số lượng của customization
+              cartPrice: customization?.price, // Giá customization
+              price: customization?.price / customization?.quantity // Giá 1 đơn vị
             });
           }
 
@@ -192,7 +201,6 @@ export const cartSlice = createSlice({
           existingItem.cartPrice += (existingItem?.cartPrice || 0) + customization?.price;
         } else {
           // nếu item ch tồn tại, thêm mới vào existingRestaurantCart
-
           const newCustomizationId = `c1`;
           existingRestaurantCart.items.push({
             ...item, // Sao chép toàn bộ thông tin item

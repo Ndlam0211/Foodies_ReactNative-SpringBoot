@@ -1,25 +1,32 @@
-import { View, Text, Image, TouchableOpacity, ScrollView, SafeAreaView } from "react-native";
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+} from "react-native";
 import React, { FC, useEffect, useState } from "react";
 import { useAppDispatch } from "@/states/reduxHook";
 import { modelStyles } from "@/unistyles/modelStyles";
 import { useStyles } from "react-native-unistyles";
-import { addCustomizableItem } from "@/states/reducers/cartSlice";
+import { addCustomizableItem, updateCustomizableItem } from "@/states/reducers/cartSlice";
 import CustomText from "../global/CustomText";
 import Icon from "../global/Icon";
 import { Colors } from "@/unistyles/Constants";
 import DottedLine from "../ui/DottedLine";
 import ScalePress from "../ui/ScalePress";
 import { RFValue } from "react-native-responsive-fontsize";
-import AnimatedNumbers from 'react-native-animated-numbers'
+import AnimatedNumbers from "react-native-animated-numbers";
 
-interface AddItemModalProps {
+interface EditItemModalProps {
   item: any;
   restaurant: any;
+  cus: any; 
   onClose: () => void;
 }
 
 /**
- * Hàm chuyển đổi dữ liệu `selectedOption` từ dạng key-value 
+ * Hàm chuyển đổi dữ liệu `selectedOption` từ dạng key-value
  * sang mảng các đối tượng đầy đủ thông tin (type + selectedOption)
  *
  * @param selectedOption - Object chứa các tùy chọn đã được chọn, dạng { type: index }
@@ -32,7 +39,6 @@ function transformSelectedOptions(
 ) {
   // Duyệt qua từng cặp key-value trong selectedOption
   return Object.entries(selectedOption).map(([type, index]) => {
-    
     // Tìm group tùy chọn trong customizationOptions có type trùng khớp
     const customization = customizationOptions?.find(
       (option: any) => option.type === type
@@ -40,9 +46,7 @@ function transformSelectedOptions(
 
     // Nếu không tìm thấy group hoặc index nằm ngoài options => báo lỗi
     if (!customization || !customization?.options[index as number]) {
-      throw new Error(
-        `Invalid customization type or index for ${type}`
-      );
+      throw new Error(`Invalid customization type or index for ${type}`);
     }
 
     // Trả về object chứa:
@@ -55,32 +59,35 @@ function transformSelectedOptions(
   });
 }
 
-
-const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
+const EditItemModal: FC<EditItemModalProps> = ({
+  item,
+  restaurant,
+  cus,
+  onClose,
+}) => {
   const dispatch = useAppDispatch();
   const { styles } = useStyles(modelStyles);
 
   const [data, setData] = useState({
-    quantity: 1,
-    price: item?.price,
+    quantity: cus?.quantity,
+    price: cus?.cartPrice, 
     selectedOption: {} as Record<string, number>,
   });
 
   useEffect(() => {
     const defaultSelectedOption: Record<string, number> = {};
-    let initialPrice = item?.price || 0;
 
-    item?.customizationOptions?.forEach((customization: any) => {
-      if (customization?.required) {
-        // Tìm index của option mặc định (có thể là option đầu tiên hoặc có giá)
-        const defaultOptionIndex = customization?.options?.findIndex(
-          (option: any) => option?.price === 0
-        );
+    cus?.customizationOptions?.forEach((cusOption: any) => {
+      const itemCustomization = item?.customizationOptions?.find(
+        (option:any) => option?.type === cusOption?.type
+      )
+      if(itemCustomization) {
+        const selectedIndex = itemCustomization?.options?.findIndex(
+          (option: any) => option?.name === cusOption?.selectedOption?.name
+        )
 
-        if (defaultOptionIndex !== -1) {
-          defaultSelectedOption[customization.type] = defaultOptionIndex;
-          initialPrice +=
-            customization?.options[defaultOptionIndex]?.price || 0;
+        if (selectedIndex !== -1) {
+          defaultSelectedOption[cusOption?.type] = selectedIndex;
         }
       }
     });
@@ -88,9 +95,8 @@ const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
     setData((prevData) => ({
       ...prevData,
       selectedOption: defaultSelectedOption,
-      price: initialPrice,
     }));
-  }, [item]);
+  }, [item, cus]);
 
   //   Lấy basePrice của món => Cộng thêm giá của các tùy chọn đã chọn (selectedOption) => Nhân với quantity
   const calculatePrice = (
@@ -173,8 +179,8 @@ const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
     }
   };
 
-  // Hàm thêm món ăn đã được tuỳ chỉnh vào giỏ hàng
-  const addItemIntoCart = async () => {
+  // Hàm update món ăn đã được tuỳ chỉnh vào giỏ hàng
+  const updateItemIntoCart = async () => {
     // 1️⃣ Chuyển đổi `selectedOption` từ state hiện tại thành mảng các option chi tiết
     const customizationOptions = transformSelectedOptions(
       data?.selectedOption, // Lựa chọn hiện tại của người dùng (kiểu { loại: index })
@@ -185,18 +191,19 @@ const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
 
     // 3️⃣ Tạo object chứa toàn bộ dữ liệu món ăn đã được tùy chỉnh
     const customizedData = {
-      restaurant: restaurant, // Thông tin nhà hàng
-      item: item, // Thông tin món ăn gốc
-      customization: {
-          quantity: data?.quantity, // Số lượng người dùng đã chọn
-          price: data?.price, // Giá đã tính toán
-          customizationOptions: customizationOptions, // Danh sách tùy chọn chi tiết
+      restaurant_id: restaurant?.id, // Thông tin nhà hàng
+      itemId: item?.id, // Thông tin món ăn gốc
+      customizationId: cus?.id, // Thông tin customization
+      newCustomization: {
+        quantity: data?.quantity, // Số lượng người dùng đã chọn
+        price: data?.price, // Giá đã tính toán
+        customizationOptions: customizationOptions, // Danh sách tùy chọn chi tiết
       }, // dùng để lưu logic tùy chỉnh nâng cao
     };
-    
-    // 4️⃣ Gửi action lên Redux để thêm món vào giỏ hàng
-    dispatch(addCustomizableItem(customizedData));
-    
+
+    // 4️⃣ Gửi action lên Redux để update món vào giỏ hàng
+    dispatch(updateCustomizableItem(customizedData));
+
     // 5️⃣ Đóng modal hoặc popup chọn món
     onClose();
   };
@@ -209,10 +216,16 @@ const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
           {/* Hiển thị ảnh món ăn */}
           <Image source={{ uri: item?.image }} style={styles.headerImage} />
 
-          {/* Hiển thị tên món ăn */}
-          <CustomText fontFamily="Okra-Medium" fontSize={12}>
-            {item?.name}
-          </CustomText>
+          <View>
+            {/* Hiển thị tên món ăn */}
+            <CustomText fontFamily="Okra-Medium" fontSize={12}>
+              {item?.name}
+            </CustomText>
+
+            <CustomText fontFamily="Okra-Medium" fontSize={9}>
+              Edit
+            </CustomText>
+          </View>
         </View>
 
         {/* Hàng ngang chứa các icon chức năng */}
@@ -339,12 +352,12 @@ const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
 
         {/* Nút "Add to Cart" */}
         <TouchableOpacity
-          style={styles.addButtonContainer} 
-          onPress={addItemIntoCart}
+          style={styles.addButtonContainer}
+          onPress={updateItemIntoCart}
         >
-            <CustomText color="#fff" fontFamily="Okra-Medium" variant="h5">
-                Add item - ${data?.price}
-            </CustomText>
+          <CustomText color="#fff" fontFamily="Okra-Medium" variant="h5">
+            Update item - ${data?.price}
+          </CustomText>
         </TouchableOpacity>
 
         <SafeAreaView />
@@ -353,4 +366,4 @@ const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
   );
 };
 
-export default AddItemModal;
+export default EditItemModal;

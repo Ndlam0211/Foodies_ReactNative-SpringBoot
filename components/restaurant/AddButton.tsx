@@ -12,6 +12,8 @@ import { useAppDispatch, useAppSelector } from "@/states/reduxHook";
 import { addItemToCart, removeCustomizableItem, removeItemFromCart, selectRestaurantCartItem } from "@/states/reducers/cartSlice";
 import CustomModal from "../modal/CustomModal";
 import AddItemModal from "../modal/AddItemModal";
+import RepeatItemModal from "../modal/RepeatItemModal";
+import RemoveItemModal from "../modal/RemoveItemModal";
 
 const AddButton: FC<{ item: any; restaurant: any }> = ({
   item,
@@ -48,14 +50,14 @@ const AddButton: FC<{ item: any; restaurant: any }> = ({
         <RemoveItemModal
           item={item}
           restaurant={restaurant}
-          onClose={() => modalRef.current?.closeModal()}
+          closeModal={() => modalRef.current?.closeModal()}
         />
       );
     };
 
     const addCartHandler = useCallback(() => {
       if (item?.isCustomizable) {
-        if (cart != null) {
+        if (cart !== null) {
           openRepeatModal();
           return;
         }

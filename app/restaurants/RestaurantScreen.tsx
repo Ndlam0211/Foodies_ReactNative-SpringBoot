@@ -11,6 +11,7 @@ import { restaurantItemsData, restaurantsItemfiltersOption } from "@/utils/dummy
 import { restaurantHeaderStyles } from "@/unistyles/restuarantStyles";
 import DottedLine from "@/components/ui/DottedLine";
 import FoodCard from "@/components/restaurant/FoodCard";
+import SearchAndOffers from "@/components/restaurant/SearchAndOffers";
 
 const RestaurantScreen: FC = () => {
   const route = useRoute() as any;
@@ -50,6 +51,8 @@ const RestaurantScreen: FC = () => {
         )}
         contentContainerStyle={styles.scrollContainer}
       />
+
+      <SearchAndOffers item={restaurant} />
     </CustomSafeAreaView>
   );
 };

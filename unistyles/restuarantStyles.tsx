@@ -122,7 +122,7 @@ export const searchStyles = createStyleSheet(({ device, colors, border }) => ({
         shadowOpacity: 0.1,
         elevation: 5,
         shadowRadius: 5,
-        bottom: Platform.OS == 'android' ? 22 : 0,
+        bottom: Platform.OS === 'android' ? 0 : 0,
         zIndex: 22,
         shadowColor: colors.secondary,
     },
