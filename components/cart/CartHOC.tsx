@@ -32,8 +32,8 @@ const CartHOC: FC = () => {
       {
         translateY:
           scrollY.value === 1
-            ? withTiming(Platform.OS === "ios" ? -15 : 0, { duration: 300 })
-            : withTiming(Platform.OS === "ios" ? -90 : -100, { duration: 300 }),
+            ? withTiming(Platform.OS === "android" ? -15 : 0, { duration: 300 })
+            : withTiming(Platform.OS === "android" ? -90 : -100, { duration: 300 }),
       },
     ],
   }));
@@ -78,8 +78,8 @@ const CartHOC: FC = () => {
         </TouchableOpacity>
       )}
 
-      {Platform.OS === "ios" && isExpand && (
-        <BlurView style={styles.absolute} tint="light" intensity={50} />
+      {Platform.OS === "android" && isExpand && (
+        <BlurView style={styles.absolute} tint="light" intensity={10} />
       )}
 
       {isExpand && <View style={styles.contentContainer} />}
@@ -87,7 +87,7 @@ const CartHOC: FC = () => {
       {isExpand && (
         <TouchableOpacity
           onPress={() => setIsExpand(false)}
-          style={styles.closeButton}
+          style={styles.closeIcon}
         >
           <Icon iconFamily="Ionicons" name="close" size={20} color="#fff" />
         </TouchableOpacity>
@@ -173,8 +173,8 @@ const CartHOC: FC = () => {
                   !isExpand && {
                     top: !isExpand
                       ? index === totalCartsLength - 1
-                        ? 0
-                        : -8
+                        ? -33
+                        : -41
                       : undefined,
                   },
 

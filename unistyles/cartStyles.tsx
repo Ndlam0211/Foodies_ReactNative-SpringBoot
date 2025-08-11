@@ -23,7 +23,7 @@ export const cartStyles = createStyleSheet(({ device, colors, border }) => ({
         gap: 2,
         zIndex: 100,
         position: 'absolute',
-        top: -15,
+        top: -45,
         borderColor: colors.border,
         borderRadius: 100,
         paddingHorizontal: 10,

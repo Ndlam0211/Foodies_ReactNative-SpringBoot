@@ -24,6 +24,9 @@ const CustomTabBar: FC<BottomTabBarProps> = (props) => {
   const isVegMode = useAppSelector((state) => state.user.isVegMode);
   const { scrollY } = useSharedState();
 
+  const carts = useAppSelector((state) => state.cart.carts);
+  const totalCartsLength = carts?.length;
+
   const { state, navigation } = props;
   const bottom = useSafeAreaInsets();
 
@@ -53,7 +56,7 @@ const CustomTabBar: FC<BottomTabBarProps> = (props) => {
 
   return (
     <>
-      {!isLiveTabFocused && <CartHOC />}
+      {!isLiveTabFocused && totalCartsLength > 0 && <CartHOC />}
       <Animated.View
         style={[
           styles.tabBarContainer,

@@ -73,7 +73,7 @@ const AddButton: FC<{ item: any; restaurant: any }> = ({
           })
         );
       }
-    }, [dispatch, item, restaurant]);
+    }, [dispatch, item, restaurant, cart]);
 
     const removeCartHandler = useCallback(() => {
         if (item?.isCustomizable) {
@@ -96,7 +96,7 @@ const AddButton: FC<{ item: any; restaurant: any }> = ({
             })
             );
         }
-    }, [dispatch, item, restaurant]);
+    }, [dispatch, item, restaurant, cart]);
 
   return (
     <>

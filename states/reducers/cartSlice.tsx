@@ -70,7 +70,7 @@ export const cartSlice = createSlice({
 
         if (existingItem) {
           existingItem.quantity += 1;
-          existingItem.cartPrice = (existingItem.cartPrice || 0) + item?.price;
+          existingItem.cartPrice = (existingItem.cartPrice || 0) + existingItem?.price;
         } else {
           existingRestaurantCart?.items?.push({
             ...item,
@@ -198,7 +198,7 @@ export const cartSlice = createSlice({
           }
 
           existingItem.quantity += customization?.quantity;
-          existingItem.cartPrice += (existingItem?.cartPrice || 0) + customization?.price;
+          existingItem.cartPrice = (existingItem?.cartPrice || 0) + customization?.price;
         } else {
           // nếu item ch tồn tại, thêm mới vào existingRestaurantCart
           const newCustomizationId = `c1`;
@@ -293,7 +293,7 @@ export const cartSlice = createSlice({
         item.cartPrice = (item?.cartPrice || 0) - customization?.price;
         
         // Nếu item không còn customization và quantity === 0 → xoá item
-        if (item.quantity === 0 || item?.customizations?.length === 0) {
+        if (item?.quantity === 0 && item?.customizations?.length === 0) {
           restaurantCart.items = restaurantCart?.items?.filter(
             (cartItem) => cartItem.id !== itemId
           );
@@ -346,7 +346,7 @@ export const cartSlice = createSlice({
       );
 
       // Tìm customization đang muốn thay đổi
-      const targetCustomizationIndex = item.customizations.findIndex(
+      const targetCustomizationIndex = item?.customizations.findIndex(
         (cust) => cust.id === customizationId
       );
       if (targetCustomizationIndex === -1) return;
@@ -401,15 +401,15 @@ export const cartSlice = createSlice({
       action: PayloadAction<{ restaurant_id: string }>
     ) => {
       const { restaurant_id } = action.payload;
+      
       state.carts = state.carts.filter(
-        (cart) => cart?.restaurant?.id === restaurant_id
+        (cart) => cart?.restaurant?.id !== restaurant_id
       );
     },
   },
 });
 
 export const { addItemToCart, removeItemFromCart, clearAllCarts, clearRestaurantCart, addCustomizableItem, removeCustomizableItem, updateCustomizableItem } = cartSlice.actions;
-export default cartSlice.reducer;
 
 // Lấy toàn bộ cart state
 export const selectCart = (state: RootState) => state.cart;
@@ -421,7 +421,7 @@ export const selectRestaurantCart = (restaurantId: string) =>
       state.cart.carts.find(
         (cart) => cart.restaurant.id === restaurantId
       ),
-    (restaurantCart) => (restaurantCart ? [...restaurantCart.items] : [])
+    restaurantCart => (restaurantCart ? [...restaurantCart.items] : [])
   );
 
 // Lấy 1 item cụ thể trong giỏ hàng của một nhà hàng
@@ -432,7 +432,9 @@ export const selectRestaurantCartItem = (
   createSelector(
     (state: RootState) =>
       state.cart.carts.find(
-        (cart) => cart.restaurant.id === restaurantId
+        cart => cart.restaurant.id === restaurantId
       )?.items,
-    (items) => items?.find((item) => item.id === itemId) || null
+    items => items?.find((item) => item.id === itemId) || null
   );
+
+export default cartSlice.reducer;
