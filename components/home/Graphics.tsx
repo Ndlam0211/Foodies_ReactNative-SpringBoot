@@ -13,7 +13,7 @@ const Graphics = () => {
         enableMergePathsAndroidForKitKatAndAbove
         enableSafeModeAndroid
         hardwareAccelerationAndroid
-        source={require('@/assets/animations/event.json')}
+        source={require("@/assets/animations/event.json")}
         autoPlay
         loop
         style={styles.lottie}

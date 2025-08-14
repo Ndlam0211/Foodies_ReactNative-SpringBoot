@@ -135,6 +135,39 @@ export const cartSlice = createSlice({
       }
     },
 
+    deleteItemFromCart: (
+      state,
+      action: PayloadAction<{
+        restaurant_id: string;
+        itemId: string;
+      }>
+    ) => {
+      const { itemId, restaurant_id } = action?.payload;
+
+      // Tìm giỏ hàng theo restaurant_id
+      const restaurantCart = state?.carts?.find(
+        (cart) => cart?.restaurant?.id === restaurant_id
+      );
+
+      if (!restaurantCart) return;
+
+      // Tìm vị trí món ăn trong giỏ
+      const itemIndex = restaurantCart.items?.findIndex(
+        (item) => item?.id === itemId
+      );
+
+      if (itemIndex !== -1) {
+        restaurantCart.items.splice(itemIndex, 1);
+      }
+
+      // Nếu giỏ hàng trống → xoá luôn nhà hàng khỏi state
+      if (restaurantCart.items.length === 0) {
+        state.carts = state.carts.filter(
+          (cart) => cart.restaurant.id !== restaurant_id
+        );
+      }
+    },
+
     addCustomizableItem: (
       state,
       action: PayloadAction<{
@@ -409,7 +442,16 @@ export const cartSlice = createSlice({
   },
 });
 
-export const { addItemToCart, removeItemFromCart, clearAllCarts, clearRestaurantCart, addCustomizableItem, removeCustomizableItem, updateCustomizableItem } = cartSlice.actions;
+export const {
+  addItemToCart,
+  removeItemFromCart,
+  deleteItemFromCart,
+  clearAllCarts,
+  clearRestaurantCart,
+  addCustomizableItem,
+  removeCustomizableItem,
+  updateCustomizableItem,
+} = cartSlice.actions;
 
 // Lấy toàn bộ cart state
 export const selectCart = (state: RootState) => state.cart;
