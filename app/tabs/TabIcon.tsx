@@ -52,7 +52,7 @@ const TabIcon: FC<TabProps> = memo(({name}) => {
             <Image 
                 source={
                     name === 'Delivery' ?
-                        Delivery : name === 'Dining' ?
+                        Delivery : name === 'Profile' ?
                             Dining : name === 'Reorder' ?
                                 Reorder : Live   
                 }
@@ -72,7 +72,7 @@ const TabIconFocused: FC<TabProps> = memo(({ name }) => {
         source={
           name === "Delivery"
             ? DeliveryFocused
-            : name === "Dining"
+            : name === "Profile"
             ? DiningFocused
             : name === "Reorder"
             ? ReorderFocused
@@ -98,7 +98,7 @@ export const ReorderTabIcon: FC<IconProp> = ({focused}) => {
 }
 
 export const DiningTabIcon: FC<IconProp> = ({focused}) => {
-    return focused ? <TabIconFocused name='Dining' /> : <TabIcon name='Dining' />;
+    return focused ? <TabIconFocused name='Profile' /> : <TabIcon name='Profile' />;
 }
 
 export const LiveTabIcon: FC<IconProp> = ({focused}) => {

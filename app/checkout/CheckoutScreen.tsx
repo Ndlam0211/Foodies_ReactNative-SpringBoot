@@ -7,7 +7,7 @@ import Icon from "@/components/global/Icon";
 import { selectRestaurantCart } from "@/states/reducers/cartSlice";
 import { useAppSelector } from "@/states/reduxHook";
 import { Colors } from "@/unistyles/Constants";
-import { goBack, navigate } from "@/utils/NavigationUtils";
+import { goBack, replace } from "@/utils/NavigationUtils";
 import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import React, { FC, useEffect, useState } from "react";
@@ -36,14 +36,13 @@ const CheckoutScreen: FC = () => {
   const [loading] = useState(false); // reserved for future loading indicator
 
   const startPayment = async () => {
-    console.log("Starting payment...: ", totalItemPrice + 34);
-
     try {
       const resp = await axios.get(
-        "http://192.168.2.26:8080/api/public/vnpay/create-payment",
+        "http://10.18.0.211:8080/api/public/vnpay/create-payment",
         {
           params: {
             amount: totalItemPrice + 34,
+            restaurant_id: `${restaurant?.id}`,
           },
           headers: {
             "Content-Type": "application/json",
@@ -53,8 +52,7 @@ const CheckoutScreen: FC = () => {
         }
       );
       const data = await resp.data;
-      console.log("url: ", data.data.paymentUrl);
-
+      console.log("Payment URL: ", data.data.paymentUrl);
       setPaymentUrl(data.data.paymentUrl);
     } catch (error) {
       console.error("Error creating payment: ", error);
@@ -67,20 +65,32 @@ const CheckoutScreen: FC = () => {
     }
   }, [cart]);
 
-  // const handlePlaceOrder = async () => {
-  //   setLoading(true);
-  //   setTimeout(() => {
-  //     setLoading(false);
-
-  //     startPayment();
-
-  //     replace("OrderSuccessScreen", {
-  //       restaurant: restaurant,
-  //     });
-  //   }, 3000);
-  // };
-
   if (paymentUrl) {
+    // const handleUrl = (url: string) => {
+    //   if (!url) return;
+    //   if (url.startsWith("foodies://")) {
+    //     const normalized = url.replace("foodies://", "").replace(/\/+/g, "/");
+    //     const [path, query] = normalized.split("?");
+
+    //     if (
+    //       path.toLowerCase() === "checkout/checkpayment" ||
+    //       path.toLowerCase() === "checkpayment"
+    //     ) {
+    //       // ✅ Parse query string thành object
+    //       const params: Record<string, string> = {};
+    //       if (query) {
+    //         query.split("&").forEach((pair) => {
+    //           const [key, value] = pair.split("=");
+    //           params[key] = decodeURIComponent(value || "");
+    //         });
+    //       }
+
+    //       // Điều hướng và clear WebView
+    //       navigate("CheckPayment", params);
+    //       setPaymentUrl(null); // ✅ Đóng WebView để tránh redirect tiếp
+    //     }
+    //   }
+    // };
     const handleUrl = (url: string) => {
       if (!url) return;
       if (url.startsWith("foodies://")) {
@@ -90,7 +100,11 @@ const CheckoutScreen: FC = () => {
           path.toLowerCase() === "checkout/checkpayment" ||
           path.toLowerCase() === "checkpayment"
         ) {
-          navigate("CheckPayment", {
+          // Unmount the WebView first so it can't handle further redirects
+          // and use replace() so CheckoutScreen (with WebView) is removed from the
+          // navigation stack — user can't go back into the VNPay flow.
+          setPaymentUrl(null);
+          replace("CheckPayment", {
             paymentMethod: "vnpay",
             queryString: query,
           });

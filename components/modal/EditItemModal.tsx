@@ -17,6 +17,8 @@ import DottedLine from "../ui/DottedLine";
 import ScalePress from "../ui/ScalePress";
 import { RFValue } from "react-native-responsive-fontsize";
 import AnimatedNumbers from "react-native-animated-numbers";
+import { crudService } from "@/api/apiService";
+import { useMessage } from "@/hooks/useMessage";
 
 interface EditItemModalProps {
   item: any;
@@ -54,6 +56,7 @@ function transformSelectedOptions(
     // - selectedOption: tùy chọn cụ thể mà người dùng đã chọn
     return {
       type,
+      required: customization?.required,
       selectedOption: customization?.options[index as number],
     };
   });
@@ -67,6 +70,7 @@ const EditItemModal: FC<EditItemModalProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const { styles } = useStyles(modelStyles);
+  const { showSuccess, showError } = useMessage();
 
   const [data, setData] = useState({
     quantity: cus?.quantity,
@@ -201,11 +205,37 @@ const EditItemModal: FC<EditItemModalProps> = ({
       }, // dùng để lưu logic tùy chỉnh nâng cao
     };
 
-    // 4️⃣ Gửi action lên Redux để update món vào giỏ hàng
-    dispatch(updateCustomizableItem(customizedData));
-
-    // 5️⃣ Đóng modal hoặc popup chọn món
-    onClose();
+    // update customization item to backend
+    await crudService.update("cart/update-customizable-item", {
+          restaurantId: restaurant.id,
+          menuItemId: item.id,
+          customizationId: cus.id,
+          newCustomization: {
+            restaurantId: restaurant.id,
+            menuItemId: item.id,
+            quantity: data?.quantity,
+            price: data?.price,
+            customizationOptions: [
+            {
+              groupType: customizationOptions[0]?.type,
+              optionName: customizationOptions[0]?.selectedOption?.name,
+              optionPrice: customizationOptions[0]?.selectedOption?.price,
+              required: customizationOptions[0]?.required,
+            },
+          ]}
+        })
+        .then((response) => {
+          // 4️⃣ Gửi action lên Redux để update món vào giỏ hàng
+          dispatch(updateCustomizableItem(customizedData));
+          // show message
+          showSuccess(`${item.name} updated in cart successfully!`);
+          // 5️⃣ Đóng modal hoặc popup chọn món
+          onClose();
+        })
+        .catch((error) => {
+          console.error("Error updating item in cart:", error);
+          showError("Failed to update item in cart.");
+        });
   };
 
   return (

@@ -1,5 +1,6 @@
 import CustomText from "@/components/global/CustomText";
 import Icon from "@/components/global/Icon";
+import { useMessage } from "@/hooks/useMessage";
 import { clearAllCarts } from "@/states/reducers/cartSlice";
 import { useAppDispatch, useAppSelector } from "@/states/reduxHook";
 import { cartStyles } from "@/unistyles/cartStyles";
@@ -19,13 +20,15 @@ import CartItem from "./CartItem";
 
 const CartHOC: FC = () => {
   const dispatch = useAppDispatch();
-  const carts = useAppSelector((state) => state.cart.carts);
+  const { showSuccess } = useMessage();
+  const carts = useAppSelector((state) => state.cart.carts) || [];
+
   const { scrollY } = useSharedState();
   const bottom = useSafeAreaInsets();
   const { styles } = useStyles(cartStyles);
 
   const [isExpand, setIsExpand] = useState(false);
-  const totalCartsLength = carts?.length;
+  const totalCartsLength = Array.isArray(carts) ? carts.length : 0;
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -33,15 +36,24 @@ const CartHOC: FC = () => {
         translateY:
           scrollY.value === 1
             ? withTiming(Platform.OS === "android" ? -15 : 0, { duration: 300 })
-            : withTiming(Platform.OS === "android" ? -90 : -100, { duration: 300 }),
+            : withTiming(Platform.OS === "android" ? -90 : -100, {
+                duration: 300,
+              }),
       },
     ],
   }));
 
   const clearCart = async () => {
     dispatch(clearAllCarts());
+    showSuccess("All carts cleared successfully!");
     setIsExpand(false);
   };
+
+  // Early return if carts is not an array (after all hooks)
+  if (!Array.isArray(carts)) {
+    console.warn("Carts is not an array:", carts);
+    return null;
+  }
 
   // TODO: Return your JSX component here
   return (
@@ -54,7 +66,7 @@ const CartHOC: FC = () => {
         },
       ]}
     >
-      {carts?.length > 1 && !isExpand && (
+      {totalCartsLength > 1 && !isExpand && (
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => setIsExpand(true)}
@@ -66,7 +78,7 @@ const CartHOC: FC = () => {
             fontSize={9}
             fontFamily="Okra-Medium"
           >
-            +{carts?.length - 1} more
+            +{totalCartsLength - 1} more
           </CustomText>
 
           <Icon
@@ -111,89 +123,99 @@ const CartHOC: FC = () => {
             </TouchableOpacity>
           </View>
 
-          {carts?.map((item, index) => {
-            return (
-              <View
-                key={index}
-                style={[
-                  { position: !isExpand ? "absolute" : "relative" },
+          {Array.isArray(carts) &&
+            carts
+              .filter(
+                (item) => item && item.restaurant && Array.isArray(item.items)
+              )
+              .map((item, index) => {
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      { position: !isExpand ? "absolute" : "relative" },
 
-                  // Scale transform when collapsed
-                  !isExpand && {
-                    transform: [
-                      {
-                        scale: index === totalCartsLength - 1 ? 1 : 0.98,
+                      // Scale transform when collapsed
+                      !isExpand && {
+                        transform: [
+                          {
+                            scale: index === totalCartsLength - 1 ? 1 : 0.98,
+                          },
+                        ],
                       },
-                    ],
-                  },
 
-                  // Top position when collapsed
-                  !isExpand && {
-                    top: !isExpand
-                      ? index === totalCartsLength - 1
-                        ? 0
-                        : -8
-                      : undefined,
-                  },
+                      // Top position when collapsed
+                      !isExpand && {
+                        top: !isExpand
+                          ? index === totalCartsLength - 1
+                            ? 0
+                            : -8
+                          : undefined,
+                      },
 
-                  // Z-index logic if not expanded
-                  !isExpand && {
-                    zIndex: !isExpand
-                      ? index === totalCartsLength - 1
-                        ? 99
-                        : 98
-                      : undefined,
-                  },
+                      // Z-index logic if not expanded
+                      !isExpand && {
+                        zIndex: !isExpand
+                          ? index === totalCartsLength - 1
+                            ? 99
+                            : 98
+                          : undefined,
+                      },
 
-                  isExpand && { width: "100%" },
-                ]}
-              >
-                <CartItem item={item} />
-              </View>
-            );
-          })}
+                      isExpand && { width: "100%" },
+                    ]}
+                  >
+                    <CartItem item={item} />
+                  </View>
+                );
+              })}
         </ScrollView>
       ) : (
         <>
-          {carts?.map((item, index) => {
-            return (
-              <View
-                key={index}
-                style={[
-                  { position: !isExpand ? "absolute" : "relative" },
+          {Array.isArray(carts) &&
+            carts
+              .filter(
+                (item) => item && item.restaurant && Array.isArray(item.items)
+              )
+              .map((item, index) => {
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      { position: !isExpand ? "absolute" : "relative" },
 
-                  // Scale transform if not expanded
-                  !isExpand && {
-                    transform: [
-                      { scale: index === totalCartsLength - 1 ? 1 : 0.98 },
-                    ],
-                  },
+                      // Scale transform if not expanded
+                      !isExpand && {
+                        transform: [
+                          { scale: index === totalCartsLength - 1 ? 1 : 0.98 },
+                        ],
+                      },
 
-                  // Positioning logic if not expanded
-                  !isExpand && {
-                    top: !isExpand
-                      ? index === totalCartsLength - 1
-                        ? -33
-                        : -41
-                      : undefined,
-                  },
+                      // Positioning logic if not expanded
+                      !isExpand && {
+                        top: !isExpand
+                          ? index === totalCartsLength - 1
+                            ? -33
+                            : -41
+                          : undefined,
+                      },
 
-                  // Z-index logic if not expanded
-                  !isExpand && {
-                    zIndex: !isExpand
-                      ? index === totalCartsLength - 1
-                        ? 99
-                        : 98
-                      : undefined,
-                  },
+                      // Z-index logic if not expanded
+                      !isExpand && {
+                        zIndex: !isExpand
+                          ? index === totalCartsLength - 1
+                            ? 99
+                            : 98
+                          : undefined,
+                      },
 
-                  isExpand && { width: "100%" },
-                ]}
-              >
-                <CartItem item={item} />
-              </View>
-            );
-          })}
+                      isExpand && { width: "100%" },
+                    ]}
+                  >
+                    <CartItem item={item} />
+                  </View>
+                );
+              })}
         </>
       )}
 

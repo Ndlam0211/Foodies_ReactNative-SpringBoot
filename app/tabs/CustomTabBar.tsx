@@ -24,8 +24,8 @@ const CustomTabBar: FC<BottomTabBarProps> = (props) => {
   const isVegMode = useAppSelector((state) => state.user.isVegMode);
   const { scrollY } = useSharedState();
 
-  const carts = useAppSelector((state) => state.cart.carts);
-  const totalCartsLength = carts?.length;
+  const carts = useAppSelector((state) => state.cart.carts) || [];
+  const totalCartsLength = Array.isArray(carts) ? carts.length : 0;
 
   const { state, navigation } = props;
   const bottom = useSafeAreaInsets();
@@ -103,7 +103,7 @@ const CustomTabBar: FC<BottomTabBarProps> = (props) => {
                 {route?.name === "Reorder" && (
                   <ReorderTabIcon focused={isFocused} />
                 )}
-                {route?.name === "Dining" && (
+                {route?.name === "Profile" && (
                   <DiningTabIcon focused={isFocused} />
                 )}
                 {route?.name === "Live" && <LiveTabIcon focused={isFocused} />}

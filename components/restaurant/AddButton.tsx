@@ -14,25 +14,28 @@ import CustomModal from "../modal/CustomModal";
 import AddItemModal from "../modal/AddItemModal";
 import RepeatItemModal from "../modal/RepeatItemModal";
 import RemoveItemModal from "../modal/RemoveItemModal";
+import {useMessage} from "@/hooks/useMessage";
+import { crudService } from "@/api/apiService";
 
 const AddButton: FC<{ item: any; restaurant: any }> = ({
   item,
   restaurant,
 }) => {
-  const { styles } = useStyles(foodStyles);
-  const dispatch = useAppDispatch();
-  const modalRef = useRef<any>(null);
-  const cart = useAppSelector(selectRestaurantCartItem(restaurant?.id, item?.id)); 
+    const { styles } = useStyles(foodStyles);
+    const { showSuccess } = useMessage();
+    const dispatch = useAppDispatch();
+    const modalRef = useRef<any>(null);
+    const cart = useAppSelector(selectRestaurantCartItem(restaurant?.id, item?.id));
 
-  const openAddModal = () => {
-    modalRef?.current?.openModal(
-      <AddItemModal
-        item={item}
-        restaurant={restaurant}
-        onClose={() => modalRef.current?.closeModal()}
-      />
-    )
-  }
+    const openAddModal = () => {
+      modalRef?.current?.openModal(
+        <AddItemModal
+          item={item}
+          restaurant={restaurant}
+          onClose={() => modalRef.current?.closeModal()}
+        />
+      )
+    };
 
     const openRepeatModal = () => {
       modalRef?.current?.openModal(
@@ -55,23 +58,57 @@ const AddButton: FC<{ item: any; restaurant: any }> = ({
       );
     };
 
+    const addItemToCartWithSync = () => async (dispatch:any) => {
+      await crudService.create("cart/add-item", {
+          restaurantId: restaurant.id,
+          menuItemId: item.id,
+          quantity: 1,
+        })
+        .then(() => {
+          dispatch(
+            addItemToCart({
+              restaurant: restaurant,
+              item: {
+                ...item,
+                customisations: [], // item không có customization nên để mảng trống
+              },
+            })
+          );
+          showSuccess(`${item.name} added to cart successfully!`);
+        })
+        .catch((error) => {
+          console.error("Error syncing cart with backend:", error);
+        });
+    };
+
+    const removeItemToCartWithSync = () => async (dispatch:any) => {
+      await crudService.create("cart/remove-item", {
+          restaurantId: restaurant.id,
+          menuItemId: item.id,
+        })
+        .then(() => {
+          dispatch(
+            removeItemFromCart({
+              restaurant_id: restaurant?.id,
+              itemId: item?.id,
+            })
+          );
+          showSuccess(`${item.name} removed from cart successfully!`);
+        })
+        .catch((error) => {
+          console.error("Error syncing cart with backend:", error);
+        });
+    };
+
     const addCartHandler = useCallback(() => {
       if (item?.isCustomizable) {
         if (cart !== null) {
           openRepeatModal();
           return;
         }
-        openAddModal()
+        openAddModal();
       } else {
-        dispatch(
-          addItemToCart({
-            restaurant: restaurant,
-            item: {
-              ...item,
-              customisations: [], // hoặc customizations tùy bạn đặt tên
-            },
-          })
-        );
+        dispatch(addItemToCartWithSync());
       }
     }, [dispatch, item, restaurant, cart]);
 
@@ -88,13 +125,9 @@ const AddButton: FC<{ item: any; restaurant: any }> = ({
               itemId: item?.id,
             })
           );
+          showSuccess(`${item.name} removed from cart successfully!`);
         } else {
-            dispatch(
-            removeItemFromCart({
-                restaurant_id: restaurant?.id,
-                itemId: item?.id,
-            })
-            );
+          dispatch(removeItemToCartWithSync());
         }
     }, [dispatch, item, restaurant, cart]);
 

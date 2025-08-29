@@ -11,6 +11,8 @@ import DottedLine from "../ui/DottedLine";
 import ScalePress from "../ui/ScalePress";
 import { RFValue } from "react-native-responsive-fontsize";
 import AnimatedNumbers from 'react-native-animated-numbers'
+import {useMessage} from "@/hooks/useMessage";
+import { crudService } from "@/api/apiService";
 
 interface AddItemModalProps {
   item: any;
@@ -50,6 +52,7 @@ function transformSelectedOptions(
     // - selectedOption: tùy chọn cụ thể mà người dùng đã chọn
     return {
       type,
+      required: customization?.required,
       selectedOption: customization?.options[index as number],
     };
   });
@@ -59,6 +62,7 @@ function transformSelectedOptions(
 const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
   const dispatch = useAppDispatch();
   const { styles } = useStyles(modelStyles);
+  const { showSuccess, showError } = useMessage();
 
   const [data, setData] = useState({
     quantity: 1,
@@ -177,7 +181,7 @@ const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
   const addItemIntoCart = async () => {
     // 1️⃣ Chuyển đổi `selectedOption` từ state hiện tại thành mảng các option chi tiết
     const customizationOptions = transformSelectedOptions(
-      data?.selectedOption, // Lựa chọn hiện tại của người dùng (kiểu { loại: index })
+      data?.selectedOption, // Lựa chọn hiện tại của người dùng (kiểu { type: index })
       item?.customizationOptions // Danh sách tùy chọn có sẵn của món ăn
     )
       // 2️⃣ Sắp xếp các tùy chọn theo tên loại (để đảm bảo thứ tự cố định)
@@ -193,12 +197,33 @@ const AddItemModal: FC<AddItemModalProps> = ({ item, restaurant, onClose }) => {
           customizationOptions: customizationOptions, // Danh sách tùy chọn chi tiết
       }, // dùng để lưu logic tùy chỉnh nâng cao
     };
-    
-    // 4️⃣ Gửi action lên Redux để thêm món vào giỏ hàng
-    dispatch(addCustomizableItem(customizedData));
-    
-    // 5️⃣ Đóng modal hoặc popup chọn món
-    onClose();
+
+    await crudService.create("cart/add-customizable-item", {
+      restaurantId: restaurant.id,
+      menuItemId: item.id,
+      quantity: data?.quantity,
+      price: data?.price,
+      customizationOptions: [
+        {
+          groupType: customizationOptions[0]?.type,
+          optionName: customizationOptions[0]?.selectedOption?.name,
+          optionPrice: customizationOptions[0]?.selectedOption?.price,
+          required: customizationOptions[0]?.required,
+        },
+      ],
+    })
+    .then((response) => {
+      // 4️⃣ Gửi action lên Redux để thêm món vào giỏ hàng
+      dispatch(addCustomizableItem(customizedData));
+      // show message
+      showSuccess(`${item.name} added to cart successfully!`);
+      // 5️⃣ Đóng modal hoặc popup chọn món
+      onClose();
+    })
+    .catch((error) => {
+      console.error("Error adding item to cart:", error);
+      showError("Failed to add item to cart.");
+    });
   };
 
   return (

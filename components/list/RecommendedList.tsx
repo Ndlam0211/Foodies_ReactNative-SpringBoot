@@ -1,5 +1,5 @@
 import { View, Image, FlatList, TouchableOpacity, ScrollView } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { cardStyles } from "@/unistyles/cardStyles";
 import { useStyles } from "react-native-unistyles";
 import ScalePress from "@/components/ui/ScalePress";
@@ -7,10 +7,33 @@ import { navigate } from "@/utils/NavigationUtils";
 import CustomText from "../global/CustomText";
 import { Colors } from "@/unistyles/Constants";
 import CustomGradient from "../global/CustomGradient";
-import { recommendedListData } from "@/utils/dummyData";
+import { crudService } from "@/api/apiService";
+
+interface Restaurant {
+  id: number | string;
+  name: string;
+  imageUrl: string;
+  time: string;
+  distance: string;
+  discount?: string;
+  discountAmount?: string;
+}
 
 const RecommendedList = () => {
   const { styles } = useStyles(cardStyles);
+  const [data, setData] = React.useState<Restaurant[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      crudService.getAll({ resource: "public/restaurants/recommended" })
+        .then((response) => {
+          setData(response);
+        }).catch((error) => {
+          console.error("Error fetching recommended restaurants: ", error.response?.data || error.message);
+        });
+    };
+    fetchData();
+  }, []);
 
   const renderItem = ({ item }: any) => {
     return (
@@ -86,10 +109,11 @@ const RecommendedList = () => {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       <FlatList
-        numColumns={Math.ceil(recommendedListData?.length / 2)}
-        data={recommendedListData}
+        key={`flatlist-${Math.ceil(data?.length / 2)}`}
+        numColumns={Math.ceil(data?.length / 2)}
+        data={data}
         scrollEnabled={false}
-        keyExtractor={item => item?.id?.toString()}
+        keyExtractor={(item) => item?.id?.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.listContainer}
         showsHorizontalScrollIndicator={false}

@@ -12,6 +12,9 @@
     "ios": {
       "supportsTablet": true
     },
+    "extra": {
+      "googleClientId": "799149011042-l48hgtq3p2somc2levvf9fgim89hq180.apps.googleusercontent.com"
+    },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -33,7 +36,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {}
   }

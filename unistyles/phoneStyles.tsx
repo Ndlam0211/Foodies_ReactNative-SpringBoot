@@ -16,7 +16,7 @@ export const phoneStyles = createStyleSheet(({ colors, fonts, border }) => ({
         gap: 10,
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 15
+        marginVertical: 10
     },
     countryPickerContainer: {
         backgroundColor: '#fff',
@@ -25,13 +25,13 @@ export const phoneStyles = createStyleSheet(({ colors, fonts, border }) => ({
         height: 45,
         flexDirection: 'row',
         gap: 5,
-        width: '18%',
+        width: '25%',
         justifyContent: 'center',
         alignItems: 'center',
     },
     phoneInputContainer: {
         backgroundColor: '#fff',
-        width: '78%',
+        width: '71%',
         ...shadowStyle,
         paddingHorizontal: 8,
         flexDirection: 'row',

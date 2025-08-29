@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Pressable } from "react-native";
+import { View, Pressable, TouchableOpacity, Text } from "react-native";
 import { homeStyles } from "@/unistyles/homeStyles";
 import { useStyles } from "react-native-unistyles";
 import CustomText from "@/components/global/CustomText";
@@ -8,6 +8,7 @@ import Icon from "../global/Icon";
 import RecommendedList from "./RecommendedList";
 import BreakerText from "../ui/BreakerText";
 import RegularFoodList from "./RegularFoodList";
+import { navigate } from "@/utils/NavigationUtils";
 
 const ExploreList = () => {
   const [tabSelected, setSelectedTab] = useState(1);
@@ -27,7 +28,7 @@ const ExploreList = () => {
             Recommended
           </CustomText>
         </Pressable>
-
+        
         <Pressable
           style={styles.rightTab(tabSelected === 2)}
           onPress={() => setSelectedTab(2)}

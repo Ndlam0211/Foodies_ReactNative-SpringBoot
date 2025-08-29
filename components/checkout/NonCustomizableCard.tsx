@@ -9,6 +9,7 @@ import Icon from "../global/Icon";
 import { Colors } from "@/unistyles/Constants";
 import { RFValue } from "react-native-responsive-fontsize";
 import AnimatedNumber from "react-native-animated-numbers";
+import { crudService } from "@/api/apiService";
 
 interface NonCustomizableCardProps {
   item: any;
@@ -22,25 +23,45 @@ const NonCustomizableCard: FC<NonCustomizableCardProps> = ({
   const dispatch = useAppDispatch();
   const {styles} = useStyles(modelStyles);
 
-  const addCartHandler = useCallback(() => {
-    dispatch(
-      addItemToCart({
-        restaurant,
-        item: {
-            ...item,
-            customizations: []
-        },
+  const addCartHandler = useCallback(async () => {
+    await crudService.create("cart/add-item", {
+        restaurantId: restaurant.id,
+        menuItemId: item.id,
+        quantity: 1,
       })
-    );
+      .then(() => {
+        dispatch(
+          addItemToCart({
+            restaurant: restaurant,
+            item: {
+              ...item,
+              customisations: [], // item không có customization nên để mảng trống
+            },
+          })
+        );
+      })
+      .catch((error) => {
+        console.error("Error syncing cart with backend:", error);
+      });
   }, [dispatch, restaurant?.id, item]);
 
-  const removeCartHandler = useCallback(() => {
-    dispatch(
-      removeItemFromCart({
-        restaurant_id: restaurant?.id,
-        itemId: item?.id,
+  const removeCartHandler = useCallback(async () => {
+    await crudService
+      .create("cart/remove-item", {
+        restaurantId: restaurant.id,
+        menuItemId: item.id,
       })
-    );
+      .then(() => {
+        dispatch(
+          removeItemFromCart({
+            restaurant_id: restaurant?.id,
+            itemId: item?.id,
+          })
+        );
+      })
+      .catch((error) => {
+        console.error("Error syncing cart with backend:", error);
+      });
   }, [dispatch, restaurant?.id, item]);
 
   return (

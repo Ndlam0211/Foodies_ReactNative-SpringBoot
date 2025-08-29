@@ -6,8 +6,8 @@ import SearchBar from './SearchBar'
 const HeaderSection = () => {
   return (
     <View>
-        <LocationHeader />
-        <SearchBar />
+      <LocationHeader />
+      <SearchBar />
     </View>
   )
 }

@@ -15,9 +15,8 @@ const OrderSuccessScreen: FC = () => {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      
       replace("UserBottomTab");
-      dispatch(clearRestaurantCart({ restaurant_id: restaurant?.id }));
+      // dispatch(clearRestaurantCart({ restaurant_id: restaurant?.id }));
     }, 2300);
 
     return () => clearTimeout(timeoutId);

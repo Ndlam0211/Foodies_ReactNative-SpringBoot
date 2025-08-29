@@ -109,36 +109,36 @@ const MainList: FC = () => {
     };
 
     return (
-        <>
-            <Animated.View style={[styles.backToTopButton,backToTopStyle]}>
-                <BackToTopButton onPress={handleScrollToTop} />
-            </Animated.View>
-            <SectionList 
-                sections={sectionedData} 
-                overScrollMode="always"
-                onScroll={handleScroll}
-                ref={sectionListRef}
-                scrollEventThrottle={16}
-                bounces={false}
-                nestedScrollEnabled
-                showsVerticalScrollIndicator={false}
-                keyExtractor={(item,index) => index.toString()}
-                contentContainerStyle={styles.listContainer}
-                stickySectionHeadersEnabled={true}
-                viewabilityConfig={viewabilityConfig}
-                onViewableItemsChanged={onViewableItemsChanged}
-                renderSectionHeader={({section}) => {
-                    if (section.title !== "Restaurants") {
-                        return null
-                    }
-                    return (
-                        <Animated.View style={[ isRestaurantVisible || isNearEnd ? styles.shadowBottom : null ]}>
-                            <SortingAndFilters menuTitle='Sort' options={filtersOption} />
-                        </Animated.View>
-                    )
-                }}
-            />
-        </>
+      <>
+        <Animated.View style={[styles.backToTopButton,backToTopStyle]}>
+            <BackToTopButton onPress={handleScrollToTop} />
+        </Animated.View>
+        <SectionList 
+            sections={sectionedData} 
+            overScrollMode="always"
+            onScroll={handleScroll}
+            ref={sectionListRef}
+            scrollEventThrottle={16}
+            bounces={false}
+            nestedScrollEnabled
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item,index) => index.toString()}
+            contentContainerStyle={styles.listContainer}
+            stickySectionHeadersEnabled={true}
+            viewabilityConfig={viewabilityConfig}
+            onViewableItemsChanged={onViewableItemsChanged}
+            renderSectionHeader={({section}) => {
+                if (section.title !== "Restaurants") {
+                    return null
+                }
+                return (
+                    <Animated.View style={[ isRestaurantVisible || isNearEnd ? styles.shadowBottom : null ]}>
+                        <SortingAndFilters menuTitle='Sort' options={filtersOption} />
+                    </Animated.View>
+                )
+            }}
+        />
+      </>
     );
 };
 

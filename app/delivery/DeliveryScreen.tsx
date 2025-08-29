@@ -1,4 +1,4 @@
-import { View, Text, Platform } from "react-native";
+import { View, Text, Platform, Touchable, TouchableOpacity } from "react-native";
 import React, { FC } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useStyles } from "react-native-unistyles";
@@ -50,7 +50,6 @@ const DeliveryScreen: FC = () => {
         <StatusBar hidden={Platform.OS !== "android"} />
         
         <View style={{height:Platform.OS === 'ios' ? insets.top : 0}} />
-
         <Animated.View style={moveUpStyle}>
           <Animated.View style={moveUpStyleNotExtrapolate}>
             <Graphics />

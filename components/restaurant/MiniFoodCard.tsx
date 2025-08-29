@@ -11,6 +11,8 @@ import Icon from '../global/Icon';
 import { Colors } from '@/unistyles/Constants';
 import { RFValue } from 'react-native-responsive-fontsize';
 import AnimatedNumber from 'react-native-animated-numbers';
+import { useMessage } from '@/hooks/useMessage';
+import { crudService } from '@/api/apiService';
 
 // Khai báo component MiniFoodCard dưới dạng Functional Component (FC) với các props:
 // - item: món ăn
@@ -21,6 +23,7 @@ const MiniFoodCard: FC<{
   cus: any;
   restaurant: any;
 }> = ({ cus, restaurant, item }) => {
+  const { showSuccess, showError } = useMessage();
   // Lấy styles từ hook useStyles với tham số modelStyles
   const { styles } = useStyles(modelStyles);
 
@@ -48,7 +51,7 @@ const MiniFoodCard: FC<{
   };
 
   // Hàm thêm món ăn tuỳ chỉnh vào giỏ hàng
-  const addCartHandler = (cus: any) => {
+  const addCartHandler = async (cus: any) => {
     // Tạo dữ liệu món ăn kèm thông tin tuỳ chỉnh
     const data = {
       restaurant: restaurant, // Thông tin nhà hàng
@@ -60,19 +63,48 @@ const MiniFoodCard: FC<{
       }, 
     };
 
-    // Gửi action để thêm món ăn tuỳ chỉnh vào Redux store
-    dispatch(addCustomizableItem(data));
+    await crudService.create("cart/add-customizable-item", {
+          restaurantId: restaurant.id,
+          menuItemId: item.id,
+          quantity: 1,
+          price: cus?.price,
+          customizationOptions: [
+            {
+              groupType: cus?.customizationOptions[0]?.type,
+              optionName: cus?.customizationOptions[0]?.selectedOption?.name,
+              optionPrice: cus?.customizationOptions[0]?.selectedOption?.price,
+              required: cus?.customizationOptions[0]?.required,
+            },
+          ],
+        })
+        .then((response) => {
+          // 4️⃣ Gửi action lên Redux để thêm món vào giỏ hàng
+          dispatch(addCustomizableItem(data));
+        })
+        .catch((error) => {
+          console.error("Error adding item to cart:", error);
+          showError("Failed to add item to cart.");
+        });
   };
 
   // Hàm xoá món ăn tuỳ chỉnh khỏi giỏ hàng
-  const removeCartHandler = (cus: any) => {
-    dispatch(
-      removeCustomizableItem({
-        restaurant_id: restaurant?.id, // ID nhà hàng
-        customizationId: cus?.id, // ID tuỳ chỉnh
-        itemId: item?.id, // ID món ăn
+  const removeCartHandler = async (cus: any) => {
+    await crudService.create("cart/remove-customizable-item", {
+      restaurantId: restaurant.id,
+      menuItemId: item.id,
+      customizationId: cus.id,
+    })
+      .then((response) => {
+        dispatch(removeCustomizableItem({
+          restaurant_id: restaurant?.id, // ID nhà hàng
+          customizationId: cus?.id, // ID tuỳ chỉnh
+          itemId: item?.id, // ID món ăn
+        }));
       })
-    );
+      .catch((error) => {
+        console.error("Error removing item from cart:", error);
+        showError("Failed to remove item from cart.");
+      });
   };
 
   return (

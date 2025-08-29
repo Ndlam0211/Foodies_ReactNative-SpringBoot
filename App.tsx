@@ -1,3 +1,4 @@
+import MessageContainer from "@/components/global/MessageContainer";
 import "@/unistyles/unistyles"; // initialize Unistyles themes
 import { navigationRef } from "@/utils/NavigationUtils";
 import { NavigationContainer } from "@react-navigation/native";
@@ -15,6 +16,12 @@ import CheckPayment from "@/app/checkout/CheckPayment";
 import OrderSuccessScreen from "@/app/checkout/OrderSuccessScreen";
 import RestaurantScreen from "@/app/restaurants/RestaurantScreen";
 import AnimatedTab from "@/app/tabs/AnimatedTab";
+import ChangePasswordScreen from "./app/auth/ChangePasswordScreen";
+import ForgotPassScreen from "./app/auth/ForgotPassScreen";
+import SignupScreen from "./app/auth/SignupScreen";
+import MessageExampleScreen from "./app/examples/MessageExampleScreen";
+import OrderDetailScreen from "./app/profile/OrderDetailScreen";
+import OrderHistoryScreen from "./app/profile/OrderHistoryScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -44,6 +51,20 @@ export default function App() {
           >
             <Stack.Screen name="SplashScreen" component={SplashScreen} />
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
+            <Stack.Screen
+              name="ForgotPassScreen"
+              component={ForgotPassScreen}
+            />
+            <Stack.Screen
+              name="ChangePasswordScreen"
+              component={ChangePasswordScreen}
+            />
+            <Stack.Screen
+              name="OrderHistoryScreen"
+              component={OrderHistoryScreen}
+            />
+            <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+            <Stack.Screen name="SignupScreen" component={SignupScreen} />
             <Stack.Screen name="UserBottomTab" component={AnimatedTab} />
             <Stack.Screen
               name="RestaurantScreen"
@@ -52,10 +73,15 @@ export default function App() {
             <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
             <Stack.Screen name="CheckPayment" component={CheckPayment} />
             <Stack.Screen
+              name="MessageExampleScreen"
+              component={MessageExampleScreen}
+            />
+            <Stack.Screen
               name="OrderSuccessScreen"
               component={OrderSuccessScreen}
             />
           </Stack.Navigator>
+          <MessageContainer />
         </NavigationContainer>
       </PersistGate>
     </Provider>

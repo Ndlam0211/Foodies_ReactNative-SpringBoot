@@ -59,7 +59,7 @@ export const cartSlice = createSlice({
 
       // Tìm giỏ hàng của nhà hàng này
       const existingRestaurantCart = state.carts.find(
-        (cart) => cart?.restaurant?.id === restaurant?.id
+        (cart) => cart?.restaurant?.id == restaurant?.id
       );
 
       if (existingRestaurantCart) {
@@ -70,7 +70,8 @@ export const cartSlice = createSlice({
 
         if (existingItem) {
           existingItem.quantity += 1;
-          existingItem.cartPrice = (existingItem.cartPrice || 0) + existingItem?.price;
+          existingItem.cartPrice =
+            (existingItem.cartPrice || 0) + existingItem?.price;
         } else {
           existingRestaurantCart?.items?.push({
             ...item,
@@ -104,7 +105,7 @@ export const cartSlice = createSlice({
 
       // Tìm giỏ hàng theo restaurant_id
       const restaurantCart = state?.carts?.find(
-        (cart) => cart?.restaurant?.id === restaurant_id
+        (cart) => cart?.restaurant?.id == restaurant_id
       );
 
       if (!restaurantCart) return;
@@ -130,7 +131,7 @@ export const cartSlice = createSlice({
       // Nếu giỏ hàng trống → xoá luôn nhà hàng khỏi state
       if (restaurantCart.items.length === 0) {
         state.carts = state.carts.filter(
-          (cart) => cart.restaurant.id !== restaurant_id
+          (cart) => cart.restaurant.id != restaurant_id
         );
       }
     },
@@ -146,7 +147,7 @@ export const cartSlice = createSlice({
 
       // Tìm giỏ hàng theo restaurant_id
       const restaurantCart = state?.carts?.find(
-        (cart) => cart?.restaurant?.id === restaurant_id
+        (cart) => cart?.restaurant?.id == restaurant_id
       );
 
       if (!restaurantCart) return;
@@ -156,6 +157,7 @@ export const cartSlice = createSlice({
         (item) => item?.id === itemId
       );
 
+      // xóa sản phẩm đó ra khỏi giỏ hàng
       if (itemIndex !== -1) {
         restaurantCart.items.splice(itemIndex, 1);
       }
@@ -184,31 +186,48 @@ export const cartSlice = createSlice({
 
       // check xem đã tồn tại cart của nhà hàng này chưa
       const existingRestaurantCart = state.carts.find(
-        cart => cart.restaurant.id === restaurant.id
+        (cart) => cart.restaurant.id == restaurant.id
       );
 
       // nếu đã tồn tại
       if (existingRestaurantCart) {
         // check xem item cần thêm đã tồn tại hay chưa
         const existingItem = existingRestaurantCart?.items?.find(
-          cartItem => cartItem?.id === item?.id,
+          (cartItem) => cartItem?.id === item?.id
         ) as any;
 
         // nếu rồi điều chỉnh số lượng
         if (existingItem) {
           // Tìm index của customization đã tồn tại trong item
           const existingCustomizationIndex =
-            existingItem?.customizations?.findIndex(
-              (cust: any) =>
-                JSON.stringify(cust.customizationOptions) ===
-                JSON.stringify(customization.customizationOptions)
-            );
+            existingItem?.customizations?.findIndex((cust: any) => {
+              const normalize = (obj: any) => {
+                const clone = JSON.parse(JSON.stringify(obj));
+
+                if (Array.isArray(clone)) {
+                  clone.forEach((item) => {
+                    if (item.selectedOption && item.selectedOption.id) {
+                      delete item.selectedOption.id;
+                    }
+                  });
+                } else if (clone.selectedOption) {
+                  delete clone.selectedOption.id;
+                }
+
+                return JSON.stringify(clone);
+              };
+
+              return (
+                normalize(cust.customizationOptions) ===
+                normalize(customization.customizationOptions)
+              );
+            });
 
           // Nếu tìm thấy customization đã tồn tại
           if (
             existingCustomizationIndex !== undefined &&
             existingCustomizationIndex !== -1
-          ) {            
+          ) {
             const existingCustomization =
               existingItem?.customizations[existingCustomizationIndex];
 
@@ -218,20 +237,20 @@ export const cartSlice = createSlice({
             // Cập nhật lại tổng giá của customization này
             existingCustomization.cartPrice += customization?.price;
           } else {
-            
             const newCustomizationId = uuidv4();
-            
+
             existingItem?.customizations?.push({
               id: newCustomizationId,
               ...customization, // Sao chép dữ liệu customization gốc
               quantity: customization?.quantity, // Số lượng của customization
               cartPrice: customization?.price, // Giá customization
-              price: customization?.price / customization?.quantity // Giá 1 đơn vị
+              price: customization?.price / customization?.quantity, // Giá 1 đơn vị
             });
           }
 
           existingItem.quantity += customization?.quantity;
-          existingItem.cartPrice = (existingItem?.cartPrice || 0) + customization?.price;
+          existingItem.cartPrice =
+            (existingItem?.cartPrice || 0) + customization?.price;
         } else {
           // nếu item ch tồn tại, thêm mới vào existingRestaurantCart
           const newCustomizationId = `c1`;
@@ -295,7 +314,7 @@ export const cartSlice = createSlice({
 
       // Tìm giỏ hàng của nhà hàng tương ứng
       const restaurantCart = state?.carts?.find(
-        (cart) => cart?.restaurant?.id === restaurant_id
+        (cart) => cart?.restaurant?.id == restaurant_id
       );
       if (!restaurantCart) return;
 
@@ -324,7 +343,7 @@ export const cartSlice = createSlice({
 
         item.quantity -= 1;
         item.cartPrice = (item?.cartPrice || 0) - customization?.price;
-        
+
         // Nếu item không còn customization và quantity === 0 → xoá item
         if (item?.quantity === 0 && item?.customizations?.length === 0) {
           restaurantCart.items = restaurantCart?.items?.filter(
@@ -339,7 +358,6 @@ export const cartSlice = createSlice({
           );
         }
       }
-
     },
 
     updateCustomizableItem: (
@@ -360,7 +378,7 @@ export const cartSlice = createSlice({
 
       // Tìm giỏ hàng của đúng nhà hàng
       const restaurantCart = state.carts.find(
-        (cart) => cart.restaurant.id === restaurant_id
+        (cart) => cart.restaurant.id == restaurant_id
       );
       if (!restaurantCart) return;
 
@@ -372,10 +390,29 @@ export const cartSlice = createSlice({
 
       // Tìm customization có options giống newCustomization (trừ customization hiện tại)
       const matchingCustomizationIndex = item.customizations.findIndex(
-        (cust) =>
-          cust.id !== customizationId &&
-          JSON.stringify(cust.customizationOptions) ===
-            JSON.stringify(newCustomization.customizationOptions)
+        (cust) => {
+          const normalize = (obj: any) => {
+                const clone = JSON.parse(JSON.stringify(obj));
+
+                if (Array.isArray(clone)) {
+                  clone.forEach((item) => {
+                    if (item.selectedOption && item.selectedOption.id) {
+                      delete item.selectedOption.id;
+                    }
+                  });
+                } else if (clone.selectedOption) {
+                  delete clone.selectedOption.id;
+                }
+
+                return JSON.stringify(clone);
+              };
+
+              return (
+                cust.id !== customizationId &&
+                normalize(cust.customizationOptions) ===
+                normalize(newCustomization.customizationOptions)
+              );
+        }
       );
 
       // Tìm customization đang muốn thay đổi
@@ -434,10 +471,25 @@ export const cartSlice = createSlice({
       action: PayloadAction<{ restaurant_id: string }>
     ) => {
       const { restaurant_id } = action.payload;
-      
+
       state.carts = state.carts.filter(
-        (cart) => cart?.restaurant?.id !== restaurant_id
+        (cart) => cart?.restaurant?.id != restaurant_id
       );
+    },
+
+    syncCartWithBackend: (state, action) => {
+      // Update local state with backend response
+      const { restaurantId, updatedCart } = action.payload;
+      const cartIndex = state.carts.findIndex(
+        (cart) => cart.restaurant.id === String(restaurantId)
+      );
+      if (cartIndex !== -1) {
+        state.carts[cartIndex] = updatedCart;
+      }
+    },
+
+    loadCartsFromBackend: (state, action) => {
+      state.carts = action.payload;
     },
   },
 });
@@ -451,6 +503,8 @@ export const {
   addCustomizableItem,
   removeCustomizableItem,
   updateCustomizableItem,
+  syncCartWithBackend,
+  loadCartsFromBackend
 } = cartSlice.actions;
 
 // Lấy toàn bộ cart state
@@ -461,7 +515,7 @@ export const selectRestaurantCart = (restaurantId: string) =>
   createSelector(
     (state: RootState) =>
       state.cart.carts.find(
-        (cart) => cart.restaurant.id === restaurantId
+        (cart) => cart.restaurant.id == restaurantId
       ),
     restaurantCart => (restaurantCart ? [...restaurantCart.items] : [])
   );
@@ -474,7 +528,7 @@ export const selectRestaurantCartItem = (
   createSelector(
     (state: RootState) =>
       state.cart.carts.find(
-        cart => cart.restaurant.id === restaurantId
+        cart => cart.restaurant.id == restaurantId
       )?.items,
     items => items?.find((item) => item.id === itemId) || null
   );

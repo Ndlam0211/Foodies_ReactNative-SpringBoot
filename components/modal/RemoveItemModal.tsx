@@ -14,10 +14,10 @@ interface RemoveItemModalProps {
 }
 
 const RemoveItemModal:FC<RemoveItemModalProps> = ({item, restaurant, closeModal}) => {
-  const cartItem = useAppSelector(
-        selectRestaurantCartItem(restaurant?.id, item?.id)
-    );
     const {styles} = useStyles(modelStyles);
+    const cartItem = useAppSelector(selectRestaurantCartItem(restaurant?.id, item?.id));
+
+    console.log("cartItem: ", JSON.stringify(cartItem, null, 2));
 
     useEffect(() => {
         if(!cartItem){

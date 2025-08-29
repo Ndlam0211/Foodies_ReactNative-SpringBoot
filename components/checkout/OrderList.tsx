@@ -7,6 +7,8 @@ import { SwipeListView } from "react-native-swipe-list-view";
 import CustomText from "../global/CustomText";
 import MiniFoodCard from "../restaurant/MiniFoodCard";
 import NonCustomizableCard from "./NonCustomizableCard";
+import {useMessage} from "@/hooks/useMessage";
+import { crudService } from "@/api/apiService";
 
 const OrderList: FC<{
   restaurant: any;
@@ -14,11 +16,22 @@ const OrderList: FC<{
   totalItems: number;
 }> = ({ cartItems, restaurant, totalItems }) => {
   const dispatch = useAppDispatch();
-  const deleteItem = useCallback(
-    (id: any) => {
-      dispatch(
-        deleteItemFromCart({ restaurant_id: restaurant.id, itemId: id })
-      );
+  const { showSuccess } = useMessage();
+  const deleteItem = useCallback( async (item: any) => {
+      await crudService
+        .delete("cart/delete-item", {
+          restaurantId: restaurant.id,
+          menuItemId: item.id,
+        })
+        .then(() => {
+          dispatch(
+            deleteItemFromCart({ restaurant_id: restaurant.id, itemId: item.id })
+          );
+          showSuccess(`${item.name} removed from cart successfully!`);
+        })
+        .catch((error) => {
+          console.error("Error syncing cart with backend:", error);
+        });
     },
     [dispatch, restaurant?.id]
   );
@@ -50,7 +63,7 @@ const OrderList: FC<{
       <View style={styles.rowBack}>
         <TouchableOpacity
           style={[styles.backBtn, { backgroundColor: "#ff3b30" }]}
-          onPress={() => deleteItem(item.id)}
+          onPress={() => deleteItem(item)}
           activeOpacity={0.7}
         >
           <Text style={styles.backText}>Delete</Text>
@@ -61,6 +74,7 @@ const OrderList: FC<{
   );
 
   const data = useMemo(() => cartItems, [cartItems]);
+  console.log("Cart items in order list:", JSON.stringify(data, null, 2));
 
   const onRowDidOpen = (rowKey: string) => {
     console.log("Row opened:", rowKey);
